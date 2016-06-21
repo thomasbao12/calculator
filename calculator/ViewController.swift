@@ -10,6 +10,7 @@ import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet private weak var displayValue: UILabel!
+    @IBOutlet private weak var descriptionValue: UILabel!
     private var model = CalculatorBrain()
     private var isInMiddleOfTyping = false
     
@@ -33,6 +34,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         displayValue.text = "0"
+        descriptionValue.text = " "
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -42,6 +44,12 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    @IBAction func clear(sender: UIButton) {
+        displayValue.text = "0"
+        isInMiddleOfTyping = false
+        model.clear()
+        descriptionValue.text = " "
+    }
     @IBAction func pressDecimal(sender: UIButton) {
         if (hasDecimal) {
             return
@@ -66,6 +74,11 @@ class ViewController: UIViewController {
         isInMiddleOfTyping = false
         model.performOperation(symbol)
         currentValue = model.result
+        if model.isPartialResult {
+            descriptionValue.text = model.descriptionSoFar + " ..."
+        } else {
+            descriptionValue.text = model.descriptionSoFar + " ="
+        }
     }
 }
 
