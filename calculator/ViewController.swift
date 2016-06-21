@@ -22,6 +22,15 @@ class ViewController: UIViewController {
         }
     }
     
+    private var hasDecimal: Bool {
+        get {
+            if let text = displayValue.text {
+                return text.characters.contains(".")
+            }
+            return false
+        }
+    }
+    
     override func viewDidLoad() {
         displayValue.text = "0"
         super.viewDidLoad()
@@ -33,6 +42,14 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    @IBAction func pressDecimal(sender: UIButton) {
+        if (hasDecimal) {
+            return
+        } else {
+            displayValue.text = displayValue.text! + "."
+            isInMiddleOfTyping = true
+        }
+    }
     @IBAction func pressDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         if isInMiddleOfTyping {
