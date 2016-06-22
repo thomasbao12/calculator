@@ -48,12 +48,6 @@ class CalculatorBrain {
         }
     }
     
-    var descriptionSoFar: String {
-        get {
-            return description
-        }
-    }
-    
     private var symbolTable: Dictionary<String, Operation> = [
         "π": Operation.Constant(M_PI),
         "e": Operation.Constant(M_E),

@@ -75,9 +75,9 @@ class ViewController: UIViewController {
         model.performOperation(symbol)
         currentValue = model.result
         if model.isPartialResult {
-            descriptionValue.text = model.descriptionSoFar + " ..."
+            descriptionValue.text = model.description + " ..."
         } else {
-            descriptionValue.text = model.descriptionSoFar + " ="
+            descriptionValue.text = model.description + " ="
         }
     }
 }
