@@ -48,6 +48,7 @@ class ViewController: UIViewController {
         displayValue.text = "0"
         isInMiddleOfTyping = false
         model.clear()
+        model.variableValues.removeAll()
         descriptionValue.text = " "
     }
     @IBAction func pressDecimal(sender: UIButton) {
@@ -66,10 +67,12 @@ class ViewController: UIViewController {
             displayValue.text = digit
             isInMiddleOfTyping = true
         }
-        model.setAccumulator(currentValue)
     }
     
     @IBAction func pressOperation(sender: UIButton) {
+        if isInMiddleOfTyping {
+            model.setAccumulator(currentValue)
+        }
         let symbol = (sender.currentTitle)!
         isInMiddleOfTyping = false
         model.performOperation(symbol)
@@ -78,6 +81,34 @@ class ViewController: UIViewController {
             descriptionValue.text = model.description + " ..."
         } else {
             descriptionValue.text = model.description + " ="
+        }
+    }
+    
+    @IBAction func setVariableValue(sender: UIButton) {
+        model.variableValues["M"] = currentValue
+        model.program = model.program
+        currentValue = model.result
+        isInMiddleOfTyping = false
+    }
+    
+    @IBAction func pressUndo(sender: UIButton) {
+        if isInMiddleOfTyping && displayValue.text != nil {
+            displayValue.text! = String(displayValue.text!.characters.dropLast())
+        } else {
+            var program = model.program
+            program.removeLast()
+            model.program = program
+            if model.isPartialResult {
+                descriptionValue.text = model.description + " ..."
+            } else {
+                descriptionValue.text = model.description + " ="
+            }
+            currentValue = model.result
+            isInMiddleOfTyping = false
+        }
+        if displayValue.text == "" || displayValue.text == nil {
+            displayValue.text = "0"
+            isInMiddleOfTyping = false
         }
     }
 }

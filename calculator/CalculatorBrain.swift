@@ -19,12 +19,33 @@ class CalculatorBrain {
         case UnaryOperation((Double) -> Double)
         case BinaryOperation((Double, Double) -> Double)
         case Equals
+        case Variable(String)
     }
     
     private var accumulator = 0.0
     private var pending: PendingBinaryOperation?
     private var accumulatorDescription: String = "0.0"
     private var pendingDescription: String = ""
+    private var internalProgram = [AnyObject]()
+    
+    typealias PropertyList = [AnyObject]
+    var program: PropertyList {
+        get {
+            return internalProgram
+        }
+        set {
+            clear()
+            if let arrayOfOps = newValue as? [AnyObject] {
+                for op in arrayOfOps {
+                    if let value = op as? Double {
+                        setAccumulator(value)
+                    } else if let operation = op as? String {
+                        performOperation(operation)
+                    }
+                }
+            }
+        }
+    }
     
     var isPartialResult: Bool {
         get {
@@ -48,6 +69,8 @@ class CalculatorBrain {
         }
     }
     
+    var variableValues: Dictionary<String, Double> = [String: Double]()
+    
     private var symbolTable: Dictionary<String, Operation> = [
         "π": Operation.Constant(M_PI),
         "e": Operation.Constant(M_E),
@@ -66,7 +89,8 @@ class CalculatorBrain {
         "×": Operation.BinaryOperation({ $0 * $1 }),
         "+": Operation.BinaryOperation({ $0 + $1 }),
         "-": Operation.BinaryOperation({ $0 - $1 }),
-        "=": Operation.Equals
+        "=": Operation.Equals,
+        "M": Operation.Variable("M")
     ]
     
     private func executePending() {
@@ -81,6 +105,7 @@ class CalculatorBrain {
     func setAccumulator(value: Double) {
         accumulator = value
         accumulatorDescription = String(accumulator)
+        internalProgram.append(value)
     }
     
     func clear() {
@@ -88,9 +113,11 @@ class CalculatorBrain {
         pendingDescription = ""
         pending = nil
         accumulator = 0.0
+        internalProgram.removeAll()
     }
     
     func performOperation(symbol: String) {
+        internalProgram.append(symbol)
         if let operation = symbolTable[symbol] {
             switch operation {
             case .Constant(let value):
@@ -105,7 +132,18 @@ class CalculatorBrain {
                 pendingDescription = accumulatorDescription + " " + symbol
             case .Equals:
                 executePending()
+            case .Variable(let variableName):
+                if let variableValue = variableValues[variableName] {
+                    accumulator = variableValue
+                } else {
+                    accumulator = 0.0
+                }
+                accumulatorDescription = symbol
             }
         }
+    }
+    
+    func setVariable(variableName: String) {
+        variableValues[variableName] = 0.0
     }
 }
