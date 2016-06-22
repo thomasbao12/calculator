@@ -23,10 +23,22 @@ class CalculatorBrain {
     
     private var accumulator = 0.0
     private var pending: PendingBinaryOperation?
-    private var description: String = ""
+    private var accumulatorDescription: String = "0.0"
+    private var pendingDescription: String = ""
+    
     var isPartialResult: Bool {
         get {
             return pending != nil
+        }
+    }
+    
+    var description: String {
+        get {
+            if (isPartialResult) {
+                return pendingDescription
+            } else {
+                return accumulatorDescription
+            }
         }
     }
     
@@ -65,10 +77,8 @@ class CalculatorBrain {
     
     private func executePending() {
         if pending != nil {
-            let last = description.characters.last
-            if (last != "." && last != ")" && (last < "0" || last > "9")) {
-                description = description + " " + String(accumulator)
-            }
+            accumulatorDescription = pendingDescription + " " + accumulatorDescription
+            pendingDescription = ""
             accumulator = pending!.binaryOperator(pending!.operand1, accumulator)
             pending = nil
         }
@@ -76,42 +86,29 @@ class CalculatorBrain {
     
     func setAccumulator(value: Double) {
         accumulator = value
-        if (!isPartialResult) {
-            description = String(accumulator)
-        }
+        accumulatorDescription = String(accumulator)
     }
     
     func clear() {
-        description = ""
+        accumulatorDescription = "0.0"
+        pendingDescription = ""
         pending = nil
-        accumulator = 0
+        accumulator = 0.0
     }
     
     func performOperation(symbol: String) {
-        if (description == "") {
-            description = String(accumulator)
-        }
         if let operation = symbolTable[symbol] {
             switch operation {
             case .Constant(let value):
                 accumulator = value
-                if (isPartialResult) {
-                    description = description + " " + symbol
-                } else {
-                    description = symbol
-                }
+                accumulatorDescription = symbol
             case .UnaryOperation(let op):
-                if (isPartialResult) {
-                    description = description + " " + symbol + "(" + String(accumulator) + ")"
-                } else {
-                    description = symbol + "(" + description + ")"
-                }
+                accumulatorDescription = symbol + "(" + accumulatorDescription + ")"
                 accumulator = op(accumulator)
-                
             case .BinaryOperation(let op):
                 executePending()
                 pending = PendingBinaryOperation(operand1: accumulator, binaryOperator: op)
-                description = description + " " + symbol
+                pendingDescription = accumulatorDescription + " " + symbol
             case .Equals:
                 executePending()
             }
